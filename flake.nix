@@ -49,12 +49,12 @@
 
       overlay = final: prev:
         let p = rec {
-          # kata-agent = prev.callPackage ./pkgs/kata-agent {};
-          # kata-kernel = prev.callPackage ./pkgs/kata-kernel {};
-          # kata-images = prev.callPackage ./pkgs/kata-images {
-          #   rootfsImage = prev.callPacakge ./pkgs/kata-images/make-ext4-fs.nix {};
-          # };
-          # kata-runtime = prev.callPackage ./pkgs/kata-runtime {};
+          kata-agent = prev.callPackage ./pkgs/kata-agent {};
+          kata-kernel = prev.callPackage ./pkgs/kata-kernel {};
+          kata-images = prev.callPackage ./pkgs/kata-images {
+            rootfsImage = prev.callPacakge ./pkgs/kata-images/make-ext4-fs.nix {};
+          };
+          kata-runtime = prev.callPackage ./pkgs/kata-runtime {};
         }; in p // { kataPackages = p; };
 
       nixosModules = {
