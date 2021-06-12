@@ -2,9 +2,11 @@
 , makeModulesClosure
 , makeInitrd, rootfsImage
 , writeScript
+, writeText
 , runCommandCC, nukeReferences, busybox, dhcpcd, glibc
 , kata-agent
 , kata-kernel
+, systemdMinimal
 }:
 
 let
@@ -138,9 +140,9 @@ let
     ln -sv ${shell} /bin/sh
     ln -s ${modules}/lib/modules /lib/modules
 
-    for x in ${lib.concatStringsSep " " kernelMods}; do
-      #modprobe $x
-    done
+    ${systemdMinimal}/lib/systemd/systemd-modules-load ${writeText "modules.conf"
+      (lib.concatStringsSep "\n" kernelMods)
+    }
 
     sleep 1
 
