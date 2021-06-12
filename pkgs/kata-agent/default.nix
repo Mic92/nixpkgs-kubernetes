@@ -36,6 +36,11 @@ rustPlatform.buildRustPackage rec {
     llvmPackages_10.clang
   ];
 
+  cargoPatches = [
+    # adapted from https://github.com/kata-containers/kata-containers/pull/2021
+    ./cargo-vendor.patch
+  ];
+
   configurePhase = ''
     make src/version.rs
   '';

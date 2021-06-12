@@ -1,0 +1,102 @@
+From 96688523c09fd6191940644546ce6fc2b850a397 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?J=C3=B6rg=20Thalheim?= <joerg@thalheim.io>
+Date: Sat, 12 Jun 2021 11:27:26 +0200
+Subject: [PATCH] Cargo.toml: remove duplicate rtnetlink crates
+
+Before rtnetlink crates were only partially overriden. This leads
+to issues when performing reproducible, offline builds (cargo vendor).
+This was solved by using patch, which makes cargo use the
+little-due/netlink source for all packages.
+Overall this also makes it more consistent since these packages
+are developed together.
+---
+ Cargo.lock | 34 +++++-----------------------------
+ Cargo.toml |  6 ++++++
+ 2 files changed, 11 insertions(+), 29 deletions(-)
+
+diff --git a/Cargo.lock b/Cargo.lock
+index 63a806d2d..928411dce 100644
+--- a/Cargo.lock
++++ b/Cargo.lock
+@@ -516,8 +516,8 @@
+  "libc",
+  "log",
+  "logging",
+- "netlink-packet-utils 0.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
+- "netlink-sys 0.6.0 (registry+https://github.com/rust-lang/crates.io-index)",
++ "netlink-packet-utils",
++ "netlink-sys",
+  "nix 0.21.0",
+  "oci",
+  "opentelemetry",
+@@ -675,7 +675,7 @@
+  "anyhow",
+  "byteorder",
+  "libc",
+- "netlink-packet-utils 0.4.0 (git+https://github.com/little-dude/netlink?rev=a9367bc4700496ddebc088110c28f40962923326)",
++ "netlink-packet-utils",
+ ]
+
+ [[package]]
+@@ -688,19 +688,7 @@
+  "byteorder",
+  "libc",
+  "netlink-packet-core",
+- "netlink-packet-utils 0.4.0 (git+https://github.com/little-dude/netlink?rev=a9367bc4700496ddebc088110c28f40962923326)",
+-]
+-
+-[[package]]
+-name = "netlink-packet-utils"
+-version = "0.4.0"
+-source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "6c2afb159d0e3ac700e85f0df25b8438b99d43ed0c0b685242fcdf1b5673e54d"
+-dependencies = [
+- "anyhow",
+- "byteorder",
+- "paste",
+- "thiserror",
++ "netlink-packet-utils",
+ ]
+
+ [[package]]
+@@ -723,23 +711,11 @@
+  "futures",
+  "log",
+  "netlink-packet-core",
+- "netlink-sys 0.6.0 (git+https://github.com/little-dude/netlink?rev=a9367bc4700496ddebc088110c28f40962923326)",
++ "netlink-sys",
+  "tokio",
+  "tokio-util",
+ ]
+
+-[[package]]
+-name = "netlink-sys"
+-version = "0.6.0"
+-source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "d61c5374735aa0cd07cb7fd820b656062b187b5588d79517f72956b57c6de9ef"
+-dependencies = [
+- "futures",
+- "libc",
+- "log",
+- "tokio",
+-]
+-
+ [[package]]
+ name = "netlink-sys"
+ version = "0.6.0"
+diff --git a/Cargo.toml b/Cargo.toml
+index 170034660..bcbaae97a 100644
+--- a/Cargo.toml
++++ b/Cargo.toml
+@@ -55,6 +55,12 @@
+ opentelemetry = "0.14.0"
+ vsock-exporter = { path = "vsock-exporter" }
+
++[patch.crates-io]
++# TODO: remove when switching to stable rtnetlink release
++netlink-packet-utils = { git = "https://github.com/little-dude/netlink", rev = "a9367bc4700496ddebc088110c28f40962923326" }
++# TODO: remove when switching to stable rtnetlink release
++netlink-sys = { git = "https://github.com/little-dude/netlink", rev = "a9367bc4700496ddebc088110c28f40962923326" }
++
+ [dev-dependencies]
+ tempfile = "3.1.0"
