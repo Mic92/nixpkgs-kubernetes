@@ -7,17 +7,19 @@ let
 
   kata-kernel = pkgs.callPackage ../pkgs/kata-kernel { };
   kata-agent = pkgs.callPackage ../pkgs/kata-agent { };
-  kata-images = pkgs.callPackage ../pkgs/kata-images {
-    inherit kata-agent kata-kernel;
-    rootfsImage = pkgs.callPackage ../pkgs/kata-images/make-ext4-fs.nix {};
-  };
-  kata-initrd = kata-images.initrd;
-  kata-rootfs = kata-images.image;
+  #kata-images = pkgs.callPackage ../pkgs/kata-images {
+  #  inherit kata-agent kata-kernel;
+  #  rootfsImage = pkgs.callPackage ../pkgs/kata-images/make-ext4-fs.nix {};
+  #};
+  kata-images = pkgs.callPackage ../pkgs/kata-upstream-images {};
+  #kata-initrd = kata-images.initrd;
+  #kata-rootfs = kata-images.image;
   kata-runtime = pkgs.callPackage ../pkgs/kata-runtime { };
 
-  kernel = "${kata-kernel}/bzImage";
-  initrd = "${kata-initrd}/initrd.gz";
-  rootfs = "${kata-rootfs}";
+  #kernel = "${kata-kernel}/bzImage";
+  #initrd = "${kata-initrd}/initrd.gz";
+  #rootfs = "${kata-rootfs}";
+  inherit (kata-images) initrd kernel rootfs;
   virtiofsd = "${pkgs.qemu}/libexec/virtiofsd";
   containerdShims = pkgs.runCommand "containerd-shims"
     {
@@ -38,9 +40,10 @@ let
       # patch up that config file
       sed -i "s|path =.*|path = \"$bin\"|g" "$cfg"
       sed -i "s|kernel =.*|kernel = \"${kernel}\"|g" "$cfg"
-      #sed -i "s|image =.*|image = \"${rootfs}\"|g" "$cfg"
-      sed -i "s|image =.*|initrd = \"${initrd}\"|g" "$cfg"
+      sed -i "s|image =.*|image = \"${rootfs}\"|g" "$cfg"
+      #sed -i "s|image =.*|initrd = \"${initrd}\"|g" "$cfg"
       sed -i "s|virtio_fs_daemon =.*|virtio_fs_daemon = \"${virtiofsd}\"|g" "$cfg"
+      sed -i "s|sandbox_cgroup_only=false|sandbox_cgroup_only=true|" "$cfg"
 
       #
       #
@@ -101,6 +104,8 @@ in
               -enable-kvm \
               -m 2048m \
               -nographic \
+              -object rng-random,id=rng0,filename=/dev/urandom \
+              -device virtio-rng,rng=rng0,romfile= \
               -kernel ${kernel} \
               -initrd ${initrd} \
               -append "init=/init console=ttyS0"
